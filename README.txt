@@ -1,15 +1,15 @@
-PARA//EQ v3 - Ecualizador parametrico cyberpunk para macOS (VST3 + AU) / FL Studio
+PARA//EQ v4 - Ecualizador paramétrico cyberpunk para macOS (VST3 + AU) / FL Studio
 
-NOVEDADES v3
-- Interfaz cyberpunk (neon, brillos, esquinas cortadas)
-- Bandas ilimitadas (hasta 24): doble clic en la grafica para anadir, clic derecho para el menu
-- Ecualizacion dinamica por banda (rango, umbral, ataque, release)
-- Boton INFO con la explicacion de cada opcion
-- Boton de polaridad (Ø POL)
-- Dos vumetros estereo: entrada a la izquierda, salida a la derecha
-- Boton RESONANCIAS: marca las frecuencias molestas; clic en un triangulo crea una banda que las reduce
+NOVEDADES v4
+- Deshacer / rehacer (flechitas pequeñas), hasta 100 pasos
+- Botón BORRAR TODO
+- PRESETS: 16 de fábrica (HPF, LPF, llamada de teléfono, radio AM, megáfono, lo-fi, voz clara,
+  de-esser dinámico, mastering suave, quitar zumbido 50/60 Hz...) y guardado de los tuyos
+- Letra nueva (Avenir Next) y textos con tildes
 
-Proximamente (siguiente entrega): sidechain externo y pista de referencia con ecualizacion automatica.
+Incluye también todo lo de la v3: bandas ilimitadas, ecualización dinámica, botón INFO, polaridad,
+vúmetros estéreo y detector de resonancias.
 
-COMPILAR: sube el contenido de esta carpeta a tu repositorio de GitHub y ejecuta Actions > Run workflow
-(o en tu Mac:  ./build_mac.sh).
+Pendiente para la siguiente entrega: sidechain externo y pista de referencia con ecualización automática.
+
+COMPILAR: sube el contenido de esta carpeta a tu repositorio de GitHub y ejecuta Actions > Run workflow.

@@ -42,6 +42,15 @@ public:
 
     juce::AudioProcessorValueTreeState apvts;
 
+    // ---- Historial de deshacer / rehacer (se usa solo desde el hilo de la interfaz)
+    void historyTick (bool userInteracting);   // llamar periódicamente desde el editor
+    void historyCheckpoint();                  // antes de un cambio hecho por código (preset, borrar todo)
+    void historyAfterProgrammatic();           // justo después de ese cambio
+    bool canUndo() const { return dirty || ! undoStack.empty(); }
+    bool canRedo() const { return ! redoStack.empty(); }
+    void undo();
+    void redo();
+
     // ---- Datos para la interfaz
     std::array<std::atomic<float>, 2> inPk, inMs, outPk, outMs;          // medidores (pico / media cuadrática)
     std::array<std::atomic<float>, EqMath::numBands> dynShown;            // desplazamiento dinámico actual (dB)
@@ -59,6 +68,15 @@ private:
     template <typename T> void process (juce::AudioBuffer<T>&);
 
     EqEngine engine;
+
+    using Snapshot = std::vector<float>;
+    Snapshot takeSnapshot() const;
+    void restoreSnapshot (const Snapshot&);
+    void flushPending();
+    std::vector<Snapshot> undoStack, redoStack;
+    Snapshot committed, lastSnap, preEdit;
+    bool dirty = false;
+    juce::uint32 lastChange = 0;
 
     std::atomic<float> *pIn = nullptr, *pOut = nullptr, *pBypass = nullptr, *pPolarity = nullptr,
                        *pHpfOn = nullptr, *pHpfFreq = nullptr, *pHpfSlope = nullptr,

@@ -126,6 +126,118 @@ juce::AudioProcessorValueTreeState::ParameterLayout ParaEQProcessor::createLayou
     return layout;
 }
 
+//==============================================================================
+//  Historial de deshacer / rehacer
+//==============================================================================
+ParaEQProcessor::Snapshot ParaEQProcessor::takeSnapshot() const
+{
+    Snapshot s;
+    const auto& ps = getParameters();
+    s.reserve ((size_t) ps.size());
+    for (auto* p : ps)
+        s.push_back (p->getValue());
+    return s;
+}
+
+void ParaEQProcessor::restoreSnapshot (const Snapshot& s)
+{
+    const auto& ps = getParameters();
+    for (int i = 0; i < ps.size() && i < (int) s.size(); ++i)
+    {
+        auto* p = ps[i];
+        if (std::abs (p->getValue() - s[(size_t) i]) > 1e-7f)
+        {
+            p->beginChangeGesture();
+            p->setValueNotifyingHost (s[(size_t) i]);
+            p->endChangeGesture();
+        }
+    }
+}
+
+void ParaEQProcessor::flushPending()
+{
+    if (! dirty)
+        return;
+
+    const auto snap = takeSnapshot();
+    if (snap != preEdit)
+    {
+        undoStack.push_back (preEdit);
+        if (undoStack.size() > 100) undoStack.erase (undoStack.begin());
+        redoStack.clear();
+    }
+    committed = lastSnap = snap;
+    dirty = false;
+}
+
+void ParaEQProcessor::historyTick (bool interacting)
+{
+    const auto now = juce::Time::getMillisecondCounter();
+    const auto snap = takeSnapshot();
+
+    if (committed.empty())
+    {
+        committed = lastSnap = snap;
+        return;
+    }
+
+    if (snap != lastSnap)
+    {
+        if (interacting || dirty)               // cambio hecho por el usuario
+        {
+            if (! dirty) { dirty = true; preEdit = committed; }
+            lastChange = now;
+        }
+        else
+        {
+            committed = snap;                   // cambio externo (automatización): no se guarda
+        }
+        lastSnap = snap;
+    }
+
+    // Cierra la edición cuando el usuario ha terminado y pasa un momento sin cambios
+    if (dirty && ! interacting && now - lastChange > 350u)
+        flushPending();
+}
+
+void ParaEQProcessor::historyCheckpoint()
+{
+    flushPending();
+    undoStack.push_back (takeSnapshot());
+    if (undoStack.size() > 100) undoStack.erase (undoStack.begin());
+    redoStack.clear();
+}
+
+void ParaEQProcessor::historyAfterProgrammatic()
+{
+    committed = lastSnap = takeSnapshot();
+    dirty = false;
+}
+
+void ParaEQProcessor::undo()
+{
+    flushPending();
+    if (undoStack.empty()) return;
+
+    const Snapshot target = undoStack.back();
+    undoStack.pop_back();
+    redoStack.push_back (takeSnapshot());
+    restoreSnapshot (target);
+    committed = lastSnap = takeSnapshot();
+}
+
+void ParaEQProcessor::redo()
+{
+    flushPending();
+    if (redoStack.empty()) return;
+
+    const Snapshot target = redoStack.back();
+    redoStack.pop_back();
+    undoStack.push_back (takeSnapshot());
+    restoreSnapshot (target);
+    committed = lastSnap = takeSnapshot();
+}
+
 void ParaEQProcessor::prepareToPlay (double sampleRate, int)
 {
     currentSr.store (sampleRate);

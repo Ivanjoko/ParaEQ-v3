@@ -1,4 +1,5 @@
 #include "PluginEditor.h"
+#include "Presets.h"
 
 using EqMath::numBands;
 
@@ -13,7 +14,7 @@ static juce::String fmtHz (float f)
 CyberLookAndFeel::CyberLookAndFeel()
 {
     setColourScheme (juce::LookAndFeel_V4::getMidnightColourScheme());
-    setDefaultSansSerifTypefaceName (juce::Font::getDefaultMonospacedFontName());
+    setDefaultSansSerifTypefaceName ("Avenir Next");
 
     setColour (juce::TextButton::buttonOnColourId, Cyber::cyan);
     setColour (juce::TextButton::textColourOffId, juce::Colours::white);
@@ -181,62 +182,77 @@ void StereoMeter::paint (juce::Graphics& g)
 static juce::String infoText()
 {
     return juce::String::fromUTF8 (R"TXT(
-PARA//EQ - GUIA RAPIDA
-======================
+PARA//EQ · GUÍA RÁPIDA
+══════════════════════
 
-LA GRAFICA
-- Doble clic en un espacio vacio: AÑADE una banda nueva justo ahí (hasta 24).
-- Arrastra un punto: izquierda/derecha cambia la FRECUENCIA, arriba/abajo la GANANCIA.
-- Mantén SHIFT mientras arrastras: ajuste 10 veces más fino.
-- Rueda del ratón sobre un punto: cambia la Q (lo ancha o estrecha que es la banda).
-- Doble clic sobre un punto: pone su ganancia a 0 dB.
-- Clic derecho sobre un punto: menú para eliminar la banda, desactivarla o activar su dinámica.
-- La línea blanca/cian es la curva total de todo el ecualizador. El fondo magenta es el
-  analizador de espectro (lo que está sonando a la salida).
+LA GRÁFICA
+• Doble clic en un espacio vacío: añade una banda nueva justo ahí (hasta 24).
+• Arrastra un punto: izquierda y derecha cambian la frecuencia; arriba y abajo, la ganancia.
+• Mantén SHIFT mientras arrastras: ajuste 10 veces más fino.
+• Rueda del ratón sobre un punto: cambia la Q (lo ancha o estrecha que es la banda).
+• Doble clic sobre un punto: pone su ganancia a 0 dB.
+• Clic derecho sobre un punto: menú para eliminar la banda, desactivarla o activar su dinámica.
+• La línea brillante es la curva total de todo el ecualizador. El fondo magenta es el analizador
+  de espectro: lo que está sonando a la salida.
 
 BARRA SUPERIOR
-- ANALIZADOR: muestra u oculta el espectro de fondo.
-- RESONANCIAS: marca con triángulos las "frecuencias molestas": picos que sobresalen del
-  resto del sonido (zumbidos, silbidos, notas que "pinchan"). Haz clic en un triángulo y se
-  crea automáticamente una banda estrecha que las reduce. Funciona mejor con el audio sonando
-  unos segundos.
-- RANGO: cuántos dB se ven en la gráfica (±6 para ajustes muy finos, ±24 para cambios grandes).
-- INFO: abre esta ayuda.
-- IN / OUT: volumen de entrada (antes del ecualizador) y de salida (después), en dB.
-- Ø POL: invierte la polaridad (da la vuelta a la onda). Útil al sumar pistas que se anulan.
-- BYPASS: desactiva todo el efecto para comparar con el sonido original.
+• ANALIZADOR: muestra u oculta el espectro de fondo.
+• RESONANCIAS: marca con triángulos las «frecuencias molestas»: picos que sobresalen del resto del
+  sonido (zumbidos, silbidos, notas que «pinchan»). Haz clic en un triángulo y se crea una banda
+  estrecha que la reduce. Funciona mejor con el audio sonando unos segundos.
+• RANGO: cuántos dB se ven en la gráfica (±6 para ajustes muy finos, ±24 para cambios grandes).
+• INFO: abre esta ayuda.
+• IN / OUT: volumen de entrada (antes del ecualizador) y de salida (después), en dB.
+• Ø POL: invierte la polaridad (le da la vuelta a la onda). Útil cuando dos pistas se anulan al sumarlas.
+• BYPASS: desactiva todo el efecto para comparar con el sonido original.
 
-VUMETROS (a los lados de la gráfica)
-- IN (izquierda): nivel de entrada, canal L y R.
-- OUT (derecha): nivel de salida, canal L y R.
-- La barra muestra el nivel medio y la marca blanca el pico. Si llega a magenta, estás en 0 dB: cuidado con saturar.
+DESHACER Y REHACER
+• Las dos flechitas de la segunda fila: ◀ deshace el último cambio y ▶ lo rehace.
+  Guardan hasta 100 pasos. Se apagan cuando no hay nada que deshacer.
+• BORRAR TODO: quita todas las bandas, los filtros y deja entrada y salida a 0 dB.
+  Si te arrepientes, pulsa la flecha de deshacer.
+
+PRESETS
+• PRESETS: abre una lista de ajustes listos para usar, agrupados por categorías:
+  filtros (HPF y LPF), efectos (llamada de teléfono, radio AM, megáfono, lo-fi, bajo el agua),
+  voz (voz clara, presencia, de-esser, quitar barro), música (más graves, brillo, mastering suave)
+  y corrección (quitar zumbido de 50 o 60 Hz).
+• Al elegir uno, sustituye las bandas y los filtros actuales. Puedes deshacerlo con la flecha.
+• GUARDAR: guarda tu ajuste actual con el nombre que quieras. Aparecerá en «Mis presets».
+  Los archivos .paraeq se guardan en la carpeta de datos de tu usuario; desde el menú puedes abrirla
+  o cargar un preset desde cualquier archivo (por ejemplo, uno que te haya pasado un amigo).
+
+VÚMETROS (a los lados de la gráfica)
+• IN (izquierda): nivel de entrada, canales L y R.
+• OUT (derecha): nivel de salida, canales L y R.
+• La barra muestra el nivel medio y la marca blanca, el pico. Si llega al magenta, estás en 0 dB: cuidado con saturar.
 
 PANEL DE BANDA (abajo a la derecha)
 Se aplica a la banda seleccionada (la que tiene el aro blanco en la gráfica).
-- Tipo: CAMPANA sube o baja una zona; SHELF GRAVES / AGUDOS sube o baja todo lo grave o todo lo agudo
+• Tipo: CAMPANA sube o baja una zona; SHELF GRAVES / AGUDOS sube o baja todo lo grave o todo lo agudo
   desde esa frecuencia; NOTCH corta una frecuencia muy concreta (no tiene ganancia).
-- ACTIVA: enciende o apaga la banda sin borrarla.
-- FREC: frecuencia central en Hz. GAN: cuántos dB sube o baja. Q: ancho; Q alta = muy estrecha.
-- + BANDA / ELIMINAR: añade o borra bandas.
-- Puedes escribir valores exactos: doble clic en un número y escribe, por ejemplo "2.5k".
+• ACTIVA: enciende o apaga la banda sin borrarla.
+• FRECUENCIA: frecuencia central en Hz. GANANCIA: cuántos dB sube o baja. Q: ancho; con Q alta la banda es muy estrecha.
+• + BANDA / ELIMINAR: añade o borra bandas.
+• Puedes escribir valores exactos: doble clic en un número y escribe, por ejemplo «2.5k».
 
-ECUALIZACION DINAMICA (panel DINAMICA)
-Una banda dinámica solo actúa cuando esa frecuencia suena fuerte. Activa el botón DINAMICA.
-- RANGO: cuánto cambia la ganancia cuando se supera el umbral. Negativo = reduce (como un
-  de-esser suave); positivo = realza cuando suena fuerte.
-- UMBRAL: nivel a partir del cual empieza a actuar. Más bajo = actúa antes.
-- ATAQUE: lo rápido que reacciona (ms). RELEASE: lo rápido que vuelve a la normalidad (ms).
-- En la gráfica verás un circulito unido al punto: es la ganancia real en este instante.
+ECUALIZACIÓN DINÁMICA (panel DINÁMICA)
+Una banda dinámica solo actúa cuando esa frecuencia suena fuerte. Activa el botón DINÁMICA.
+• RANGO: cuánto cambia la ganancia al superar el umbral. Negativo = reduce (como un de-esser suave);
+  positivo = realza cuando suena fuerte.
+• UMBRAL: nivel a partir del cual empieza a actuar. Más bajo = actúa antes.
+• ATAQUE: lo rápido que reacciona (ms). RELEASE: lo rápido que vuelve a la normalidad (ms).
+• En la gráfica verás un circulito unido al punto: es la ganancia real en ese instante.
 
 FILTROS DE CORTE (panel izquierdo)
-- HPF corta los graves por debajo de la frecuencia elegida (quita ruidos y retumbos).
-- LPF corta los agudos por encima de la frecuencia elegida (suaviza el siseo).
-- La pendiente (12, 24, 36 o 48 dB/oct) indica lo brusco que es el corte.
+• HPF corta los graves por debajo de la frecuencia elegida (quita ruidos y retumbos).
+• LPF corta los agudos por encima de la frecuencia elegida (suaviza el siseo).
+• La pendiente (12, 24, 36 o 48 dB/oct) indica lo brusco que es el corte.
 
 CONSEJOS
-- Para quitar un zumbido: activa RESONANCIAS, deja sonar y haz clic en el triángulo.
-- Para recortar solo cuando molesta (voces con "eses"): banda en agudos + DINAMICA con RANGO negativo.
-- Mueve siempre con calma: las bandas suben o bajan de forma suave, sin clics.
+• Para quitar un zumbido: activa RESONANCIAS, deja sonar el audio y haz clic en el triángulo.
+• Para recortar solo cuando molesta (voces con «eses»): una banda en agudos con DINÁMICA y RANGO negativo.
+• Todos los cambios son suaves: no se oyen clics al mover o activar bandas.
 )TXT");
 }
 
@@ -719,7 +735,7 @@ void EqGraph::showMenu (int b)
     juce::PopupMenu m;
     m.addItem (1, "Eliminar banda");
     m.addItem (2, getParam (bandId (b, "on")) > 0.5f ? "Desactivar banda" : "Activar banda");
-    m.addItem (3, getParam (bandId (b, "dyn")) > 0.5f ? "Quitar dinamica" : "Activar dinamica");
+    m.addItem (3, getParam (bandId (b, "dyn")) > 0.5f ? Cyber::u8 ("Quitar dinámica") : Cyber::u8 ("Activar dinámica"));
 
     m.showMenuAsync (juce::PopupMenu::Options(), [this, b] (int r)
     {
@@ -840,7 +856,7 @@ ParaEQEditor::ParaEQEditor (ParaEQProcessor& p)
     addAndMakeVisible (meterOut);
 
     label (lblIn, "IN");          label (lblOut, "OUT");
-    label (lblFreq, "FREC");      label (lblGain, "GAN");       label (lblQ, "Q");
+    label (lblFreq, "FRECUENCIA");      label (lblGain, "GANANCIA");       label (lblQ, "Q");
     label (lblRange, "RANGO");    label (lblThr, "UMBRAL");     label (lblAtk, "ATAQUE");  label (lblRel, "RELEASE");
     label (lblHpf, "HPF");        label (lblLpf, "LPF");
 
@@ -911,6 +927,31 @@ ParaEQEditor::ParaEQEditor (ParaEQProcessor& p)
     for (auto* l : { &lblIn, &lblOut, &lblFreq, &lblGain, &lblQ, &lblRange, &lblThr, &lblAtk, &lblRel, &lblHpf, &lblLpf })
         addAndMakeVisible (*l);
 
+    // ---- Deshacer / rehacer (flechitas), presets y borrar todo
+    addAndMakeVisible (undoBtn);
+    addAndMakeVisible (redoBtn);
+    undoBtn.onClick = [this] { proc.undo(); reselect(); };
+    redoBtn.onClick = [this] { proc.redo(); reselect(); };
+
+    presetBtn.setButtonText ("PRESETS");
+    presetBtn.setColour (juce::TextButton::buttonOnColourId, Cyber::cyan);
+    presetBtn.onClick = [this] { showPresetMenu(); };
+    addAndMakeVisible (presetBtn);
+
+    saveBtn.setButtonText ("GUARDAR");
+    saveBtn.setColour (juce::TextButton::buttonOnColourId, Cyber::green);
+    saveBtn.onClick = [this] { askSavePreset(); };
+    addAndMakeVisible (saveBtn);
+
+    clearBtn.setButtonText ("BORRAR TODO");
+    clearBtn.setColour (juce::TextButton::buttonOnColourId, Cyber::magenta);
+    clearBtn.onClick = [this]
+    {
+        runProgrammatic ([this] { Presets::clearEq (proc.apvts, true); });
+        setPresetName ({});
+    };
+    addAndMakeVisible (clearBtn);
+
     addChildComponent (info);
     info.onClose = [this] { info.setVisible (false); };
 
@@ -927,7 +968,7 @@ ParaEQEditor::ParaEQEditor (ParaEQProcessor& p)
     aLpfSlope = std::make_unique<CA> (a, "lpfSlope", lpfSlope);
 
     selectBand (graph.firstUsed());
-    setSize (1180, 760);
+    setSize (1180, 800);
     startTimerHz (30);
 }
 
@@ -1013,6 +1054,17 @@ void ParaEQEditor::timerCallback()
     meterOut.setLevels (db (outR[0]), db (outR[1]), db (outP[0]), db (outP[1]));
 
     updateEnabled();
+
+    // Historial de deshacer / rehacer: solo se anotan cambios hechos con el ratón o el teclado
+    const auto now = juce::Time::getMillisecondCounter();
+    const bool rawInteracting = juce::ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown()
+                             || dynamic_cast<juce::TextEditor*> (juce::Component::getCurrentlyFocusedComponent()) != nullptr;
+    if (rawInteracting) lastInteraction = now;
+    proc.historyTick (now - lastInteraction < 800u);
+
+    const bool cu = proc.canUndo(), cr = proc.canRedo();
+    undoBtn.setEnabled (cu);  undoBtn.setAlpha (cu ? 1.f : 0.3f);
+    redoBtn.setEnabled (cr);  redoBtn.setAlpha (cr ? 1.f : 0.3f);
 }
 
 void ParaEQEditor::resized()
@@ -1036,6 +1088,19 @@ void ParaEQEditor::resized()
     };
     placeGain (lblOut, outSl, top.removeFromRight (190));  top.removeFromRight (8);
     placeGain (lblIn,  inSl,  top.removeFromRight (190));
+
+    // Segunda fila: deshacer / rehacer, presets, borrar todo
+    r.removeFromTop (4);
+    {
+        auto row2 = r.removeFromTop (36);
+        undoRect = row2.removeFromLeft (34);  row2.removeFromLeft (6);
+        redoRect = row2.removeFromLeft (34);  row2.removeFromLeft (14);
+        undoBtn.setBounds (undoRect.reduced (10, 10));
+        redoBtn.setBounds (redoRect.reduced (10, 10));
+        presetBtn.setBounds (row2.removeFromLeft (300).reduced (0, 3));  row2.removeFromLeft (6);
+        saveBtn.setBounds   (row2.removeFromLeft (100).reduced (0, 3));  row2.removeFromLeft (14);
+        clearBtn.setBounds  (row2.removeFromLeft (120).reduced (0, 3));
+    }
 
     r.removeFromTop (6);
     auto mid = r.removeFromTop (400);
@@ -1107,6 +1172,16 @@ void ParaEQEditor::paint (juce::Graphics& g)
     for (int y = 0; y < getHeight(); y += 3)
         g.drawHorizontalLine (y, 0.f, (float) getWidth());
 
+    // Marcos de las flechitas de deshacer / rehacer
+    for (auto rr : { undoRect, redoRect })
+    {
+        auto p = Cyber::chamfer (rr.toFloat().reduced (1.f), 5.f);
+        g.setColour (Cyber::panel);
+        g.fillPath (p);
+        g.setColour (Cyber::yellow.withAlpha (0.6f));
+        g.strokePath (p, juce::PathStrokeType (1.2f));
+    }
+
     // Título con brillo
     g.setFont (Cyber::mono (28.f, true));
     g.setColour (Cyber::magenta.withAlpha (0.35f));
@@ -1138,4 +1213,131 @@ void ParaEQEditor::paint (juce::Graphics& g)
     g.setColour (juce::Colours::white.withAlpha (0.55f));
     g.drawText ("FILTRO", capFilter, juce::Justification::centred);
     g.drawText (Cyber::u8 ("DINÁMICA"), capDyn, juce::Justification::centred);
+}
+
+
+//==============================================================================
+//  Deshacer, presets y borrar todo
+//==============================================================================
+void ParaEQEditor::reselect()
+{
+    selectBand ((selected >= 0 && graph.bandUsed (selected)) ? selected : graph.firstUsed());
+}
+
+// Ejecuta un cambio hecho por código (preset, borrar todo) guardándolo en el historial
+void ParaEQEditor::runProgrammatic (std::function<void()> change)
+{
+    proc.historyCheckpoint();
+    change();
+    proc.historyAfterProgrammatic();
+    selectBand (graph.firstUsed());
+}
+
+void ParaEQEditor::setPresetName (const juce::String& n)
+{
+    currentPreset = n;
+    presetBtn.setButtonText (n.isEmpty() ? juce::String ("PRESETS") : "PRESET: " + n);
+}
+
+void ParaEQEditor::showPresetMenu()
+{
+    juce::PopupMenu menu;
+    const auto& list = Presets::factory();
+
+    juce::PopupMenu sub;
+    juce::String cat;
+    for (size_t i = 0; i < list.size(); ++i)
+    {
+        const auto c = Cyber::u8 (list[i].category);
+        if (c != cat)
+        {
+            if (cat.isNotEmpty()) menu.addSubMenu (cat, sub);
+            sub = juce::PopupMenu();
+            cat = c;
+        }
+        sub.addItem (1000 + (int) i, Cyber::u8 (list[i].name));
+    }
+    if (cat.isNotEmpty()) menu.addSubMenu (cat, sub);
+
+    menu.addSeparator();
+
+    const auto files = Presets::userFiles();
+    juce::PopupMenu mine;
+    if (files.empty())
+        mine.addItem (9, Cyber::u8 ("(vacío)"), false, false);
+    for (size_t i = 0; i < files.size(); ++i)
+        mine.addItem (2000 + (int) i, files[i].getFileNameWithoutExtension());
+    menu.addSubMenu (Cyber::u8 ("Mis presets"), mine);
+
+    menu.addSeparator();
+    menu.addItem (1, Cyber::u8 ("Guardar preset actual..."));
+    menu.addItem (2, "Cargar desde archivo...");
+    menu.addItem (3, "Abrir carpeta de presets");
+
+    juce::Component::SafePointer<ParaEQEditor> self (this);
+    menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&presetBtn), [self, files] (int r)
+    {
+        if (self == nullptr || r == 0)
+            return;
+
+        if (r >= 2000)
+        {
+            self->loadPresetFile (files[(size_t) (r - 2000)]);
+        }
+        else if (r >= 1000)
+        {
+            const auto& p = Presets::factory()[(size_t) (r - 1000)];
+            self->runProgrammatic ([self, &p] { Presets::apply (self->proc.apvts, p); });
+            self->setPresetName (Cyber::u8 (p.name));
+        }
+        else if (r == 1)
+        {
+            self->askSavePreset();
+        }
+        else if (r == 2)
+        {
+            self->fileChooser = std::make_unique<juce::FileChooser> ("Elige un preset", Presets::userDir(), "*.paraeq");
+            self->fileChooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                                            [self] (const juce::FileChooser& fc)
+                                            {
+                                                const auto f = fc.getResult();
+                                                if (self != nullptr && f.existsAsFile())
+                                                    self->loadPresetFile (f);
+                                            });
+        }
+        else if (r == 3)
+        {
+            Presets::userDir().createDirectory();
+            Presets::userDir().revealToUser();
+        }
+    });
+}
+
+void ParaEQEditor::loadPresetFile (const juce::File& f)
+{
+    if (auto xml = juce::parseXML (f))
+    {
+        runProgrammatic ([this, &xml] { Presets::applyXml (proc.apvts, *xml); });
+        setPresetName (f.getFileNameWithoutExtension());
+    }
+}
+
+void ParaEQEditor::askSavePreset()
+{
+    auto* w = new juce::AlertWindow (Cyber::u8 ("Guardar preset"), Cyber::u8 ("Escribe un nombre para tu preset:"),
+                                     juce::MessageBoxIconType::NoIcon, this);
+    w->addTextEditor ("name", currentPreset.isEmpty() ? juce::String ("Mi preset") : currentPreset, juce::String());
+    w->addButton ("Guardar", 1, juce::KeyPress (juce::KeyPress::returnKey));
+    w->addButton ("Cancelar", 0, juce::KeyPress (juce::KeyPress::escapeKey));
+
+    juce::Component::SafePointer<ParaEQEditor> self (this);
+    w->enterModalState (true, juce::ModalCallbackFunction::create ([self, w] (int result)
+    {
+        if (result != 1 || self == nullptr)
+            return;
+
+        const auto name = w->getTextEditorContents ("name").trim();
+        if (name.isNotEmpty() && Presets::saveUser (self->proc.apvts, name))
+            self->setPresetName (name);
+    }), true);
 }

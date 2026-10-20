@@ -38,7 +38,7 @@ namespace Cyber
 
     inline juce::FontOptions mono (float h, bool bold = false)
     {
-        return juce::FontOptions (juce::Font::getDefaultMonospacedFontName(), h, bold ? juce::Font::bold : juce::Font::plain);
+        return juce::FontOptions ("Avenir Next", h, bold ? juce::Font::bold : juce::Font::plain);   // letra moderna y limpia
     }
 
     inline juce::String u8 (const char* s) { return juce::String::fromUTF8 (s); }
@@ -110,6 +110,7 @@ public:
     void deleteBand (int b);
     int  firstUsed() const;
     int  numUsed() const;
+    bool bandUsed (int b) const { return b >= 0 && b < EqMath::numBands && isUsed (b); }
 
     void paint (juce::Graphics&) override;
     void mouseDown (const juce::MouseEvent&) override;
@@ -170,6 +171,12 @@ private:
     void updateEnabled();
     void knob (juce::Slider&);
     void label (juce::Label&, const juce::String&);
+    void reselect();
+    void runProgrammatic (std::function<void()> change);
+    void setPresetName (const juce::String&);
+    void showPresetMenu();
+    void askSavePreset();
+    void loadPresetFile (const juce::File&);
 
     using SA = juce::AudioProcessorValueTreeState::SliderAttachment;
     using BA = juce::AudioProcessorValueTreeState::ButtonAttachment;
@@ -185,6 +192,8 @@ private:
     juce::Slider inSl, outSl, hpfFreq, lpfFreq, bFreq, bGain, bQ, dRange, dThr, dAtk, dRel;
     juce::TextButton bypassBtn, polBtn, analyzerBtn, resBtn, infoBtn, hpfOn, lpfOn, bandOn, dynBtn, addBtn, delBtn;
     juce::ComboBox hpfSlope, lpfSlope, bType, rangeBox;
+    juce::ArrowButton undoBtn { "deshacer", 0.5f, Cyber::yellow }, redoBtn { "rehacer", 0.0f, Cyber::yellow };
+    juce::TextButton presetBtn, saveBtn, clearBtn;
 
     std::unique_ptr<SA> aIn, aOut, aHpfFreq, aLpfFreq, aBFreq, aBGain, aBQ, aDRange, aDThr, aDAtk, aDRel;
     std::unique_ptr<BA> aBypass, aPol, aHpfOn, aLpfOn, aBandOn, aDyn;
@@ -192,7 +201,10 @@ private:
 
     int selected = -1;
     float inR[2] {}, inP[2] {}, outR[2] {}, outP[2] {};
-    juce::Rectangle<int> titleArea, filtersPanel, bandPanel, capFilter, capDyn;
+    juce::Rectangle<int> titleArea, filtersPanel, bandPanel, capFilter, capDyn, undoRect, redoRect;
+    juce::String currentPreset;
+    juce::uint32 lastInteraction = 0;
+    std::unique_ptr<juce::FileChooser> fileChooser;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParaEQEditor)
 };
