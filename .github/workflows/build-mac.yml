@@ -1,0 +1,34 @@
+name: Compilar ParaEQ (macOS)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compilar universal (Apple Silicon e Intel)
+        run: |
+          SRC=$(dirname "$(find . -name CMakeLists.txt -not -path './build/*' | head -n 1)")
+          echo "Proyecto encontrado en $SRC"
+          cmake -S "$SRC" -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release -j 4
+
+      - name: Empaquetar y firmar
+        run: |
+          SRC=$(dirname "$(find . -name CMakeLists.txt -not -path './build/*' | head -n 1)")
+          mkdir out
+          cp -R "$(find build -name ParaEQ.vst3 -maxdepth 5 | head -n 1)" out/
+          cp -R "$(find build -name ParaEQ.component -maxdepth 5 | head -n 1)" out/
+          codesign --force --deep -s - out/ParaEQ.vst3
+          codesign --force --deep -s - out/ParaEQ.component
+          cp "$SRC/Instalar.command" out/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ParaEQ-macOS
+          path: out
